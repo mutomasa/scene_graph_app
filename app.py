@@ -22,7 +22,12 @@ class SceneGraph:
     edges: List[Tuple[int, int, float]]  # (subject, object, score)
 
 
-def run_pipeline(image: Image.Image, score_threshold: float = 0.6) -> SceneGraph:
+def run_pipeline(
+    image: Image.Image,
+    score_threshold: float = 0.6,
+    edge_threshold: float = 0.1,
+    top_k_fallback: int = 10,
+) -> SceneGraph:
     detector = MaskRCNNDetector(score_threshold=score_threshold)
     detections: List[Detection] = detector.detect(image)
     boxes = [d.bbox for d in detections]
@@ -33,11 +38,16 @@ def run_pipeline(image: Image.Image, score_threshold: float = 0.6) -> SceneGraph
         for p in pairs
     ]
     scores = refine_relations(candidates)
-    edges = [
-        (c.subject_index, c.object_index, s)
+    scored_edges = [
+        (c.subject_index, c.object_index, float(s))
         for c, s in zip(candidates, scores)
-        if s >= 0.5
     ]
+    # しきい値で採択
+    edges = [e for e in scored_edges if e[2] >= edge_threshold]
+    # 全て落ちた場合は上位Kを表示（可視化のためのフォールバック）
+    if not edges and scored_edges:
+        scored_edges.sort(key=lambda x: x[2], reverse=True)
+        edges = scored_edges[: top_k_fallback]
     return SceneGraph(boxes=boxes, labels=labels, edges=edges)
 
 
@@ -53,6 +63,7 @@ def main() -> None:
     )
 
     score_th = st.sidebar.slider("検出スコア閾値", 0.0, 1.0, 0.6, 0.05)
+    rel_th = st.sidebar.slider("関係スコア閾値", 0.0, 1.0, 0.1, 0.05)
     uploaded = st.file_uploader("テスト画像をアップロード", type=["jpg", "jpeg", "png"])
     use_sample = st.button("サンプル画像を読み込む")
 
@@ -98,7 +109,7 @@ def main() -> None:
     col1.image(img, caption="入力画像", use_container_width=True)
 
     with st.spinner("推論中..."):
-        sg = run_pipeline(img, score_threshold=score_th)
+        sg = run_pipeline(img, score_threshold=score_th, edge_threshold=rel_th)
 
     g = build_graph(sg.boxes, sg.labels, sg.edges)
     categories = get_coco_categories()
