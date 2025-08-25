@@ -4,6 +4,7 @@ from typing import List, Optional, Sequence, Tuple
 
 import networkx as nx
 import plotly.graph_objects as go
+from PIL import Image, ImageDraw, ImageFont
 
 
 def build_graph(
@@ -61,4 +62,35 @@ def to_plotly_figure(graph: nx.DiGraph, node_text: Optional[List[str]] = None) -
     fig.update_layout(showlegend=False, margin=dict(l=20, r=20, t=20, b=20))
     return fig
 
+
+def draw_boxes(
+    image: Image.Image,
+    boxes: Sequence[Tuple[float, float, float, float]],
+    labels: Sequence[int],
+    scores: Optional[Sequence[float]] = None,
+    categories: Optional[Sequence[str]] = None,
+) -> Image.Image:
+    img = image.convert("RGB").copy()
+    draw = ImageDraw.Draw(img)
+    try:
+        font = ImageFont.load_default()
+    except Exception:
+        font = None  # type: ignore
+
+    for idx, (box, label) in enumerate(zip(boxes, labels)):
+        x1, y1, x2, y2 = box
+        color = "#00FF88"
+        draw.rectangle([(x1, y1), (x2, y2)], outline=color, width=3)
+        name = str(label)
+        if categories and 0 <= label < len(categories):
+            name = categories[label]
+        score_txt = f" {scores[idx]:.2f}" if scores is not None and idx < len(scores) else ""
+        text = f"{name}{score_txt}"
+        if font is not None:
+            tw, th = draw.textlength(text, font=font), 12
+            draw.rectangle([(x1, y1 - th - 2), (x1 + tw + 6, y1)], fill=color)
+            draw.text((x1 + 3, y1 - th - 1), text, fill="#000000", font=font)
+        else:
+            draw.text((x1, y1), text, fill=color)
+    return img
 

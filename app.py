@@ -12,7 +12,7 @@ import urllib3
 from src.detector import MaskRCNNDetector, Detection, get_coco_categories
 from src.relation_proposal import relation_proposals
 from src.agcn_refine import RelationCandidate, refine_relations
-from src.viz import build_graph, to_plotly_figure
+from src.viz import build_graph, to_plotly_figure, draw_boxes
 
 
 @dataclass
@@ -106,13 +106,18 @@ def main() -> None:
         st.info("テスト画像をアップロードするか、サンプル画像を読み込んでください。")
         return
 
-    col1.image(img, caption="入力画像", use_container_width=True)
-
     with st.spinner("推論中..."):
         sg = run_pipeline(img, score_threshold=score_th, edge_threshold=rel_th)
 
-    g = build_graph(sg.boxes, sg.labels, sg.edges)
+    # 検出結果を画像に描画して左カラムに表示
     categories = get_coco_categories()
+    try:
+        drawn = draw_boxes(img, sg.boxes, sg.labels, scores=None, categories=categories)
+        col1.image(drawn, caption="検出結果 (Bounding Boxes)", use_container_width=True)
+    except Exception:
+        col1.image(img, caption="入力画像", use_container_width=True)
+
+    g = build_graph(sg.boxes, sg.labels, sg.edges)
     def label_name(idx: int) -> str:
         if 0 <= idx < len(categories):
             return categories[idx]
@@ -120,6 +125,13 @@ def main() -> None:
     node_text = [f"{i}: {label_name(l)}" for i, l in enumerate(sg.labels)]
     fig = to_plotly_figure(g, node_text=node_text)
     col2.plotly_chart(fig, use_container_width=True)
+
+    # 下部にも拡大表示を提供（オプション）
+    with st.expander("検出結果の大きな表示"):
+        try:
+            st.image(drawn, caption="検出結果 (Bounding Boxes)", use_container_width=True)
+        except Exception:
+            st.image(img, caption="入力画像", use_container_width=True)
 
     st.subheader("エッジ一覧 (subject → object, score)")
     for s, o, sc in sg.edges:
