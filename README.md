@@ -10,6 +10,9 @@
 
 - 参考: Graph R-CNN for Scene Graph Generation (ECCV 2018) [arXiv:1808.00191](https://arxiv.org/abs/1808.00191)
 
+![Uploading image.png…]()
+
+
 ### 技術的概要
 
 - 検出: `torchvision` の `maskrcnn_resnet50_fpn` を推論モードで使用。
