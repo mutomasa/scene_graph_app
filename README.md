@@ -10,7 +10,7 @@
 
 - 参考: Graph R-CNN for Scene Graph Generation (ECCV 2018) [arXiv:1808.00191](https://arxiv.org/abs/1808.00191)
 
-![Uploading image.png…]()
+<img width="1121" height="752" alt="image" src="https://github.com/user-attachments/assets/16566e71-9073-41f4-a2c9-ea43538104cb" />
 
 
 ### 技術的概要
