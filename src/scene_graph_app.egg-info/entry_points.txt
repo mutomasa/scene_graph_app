@@ -1,0 +1,2 @@
+[console_scripts]
+scene-graph-app = app:main

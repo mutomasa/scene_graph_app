@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/agcn_refine.py
+src/detector.py
+src/relation_proposal.py
+src/viz.py
+src/scene_graph_app.egg-info/PKG-INFO
+src/scene_graph_app.egg-info/SOURCES.txt
+src/scene_graph_app.egg-info/dependency_links.txt
+src/scene_graph_app.egg-info/entry_points.txt
+src/scene_graph_app.egg-info/requires.txt
+src/scene_graph_app.egg-info/top_level.txt

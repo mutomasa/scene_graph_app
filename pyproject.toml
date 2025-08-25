@@ -1,0 +1,50 @@
+[project]
+name = "scene-graph-app"
+version = "0.1.0"
+description = "Streamlit app for scene graph generation with Mask R-CNN, Relation Proposal, and attentional refinement"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "mutomasa" }
+]
+dependencies = [
+  "streamlit>=1.37.0",
+  "torch>=2.2.0",
+  "torchvision>=0.17.0",
+  "numpy>=1.24.0",
+  "pillow>=10.0.0",
+  "networkx>=3.1",
+  "plotly>=5.20.0",
+  "requests>=2.32.0",
+  "typing-extensions>=4.9.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.5.0",
+  "mypy>=1.10.0"
+]
+
+[project.scripts]
+scene-graph-app = "app:main"
+
+[tool.uv]
+package = true
+index-url = "https://pypi.org/simple"
+dev-dependencies = [
+  "ruff>=0.5.0",
+  "mypy>=1.10.0"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
